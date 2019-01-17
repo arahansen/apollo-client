@@ -224,26 +224,31 @@ export class InMemoryCache extends ApolloCache<NormalizedCacheObject> {
 
   public removeOptimistic(idToRemove: string) {
     const toReapply: OptimisticCacheLayer[] = [];
-
+    let removedCount = 0;
     let layer = this.optimisticData;
+
     while (layer instanceof OptimisticCacheLayer) {
-      if (layer.optimisticId !== idToRemove) {
+      if (layer.optimisticId === idToRemove) {
+        ++removedCount;
+      } else {
         toReapply.push(layer);
       }
       layer = layer.parent;
     }
 
-    // Reset this.optimisticData to the first non-OptimisticCacheLayer object,
-    // which is almost certainly this.data.
-    this.optimisticData = layer;
+    if (removedCount > 0) {
+      // Reset this.optimisticData to the first non-OptimisticCacheLayer object,
+      // which is almost certainly this.data.
+      this.optimisticData = layer;
 
-    // Reapply the layers whose optimistic IDs do not match the removed ID.
-    while (toReapply.length > 0) {
-      const layer = toReapply.pop();
-      this.performTransaction(layer.transaction, layer.optimisticId);
+      // Reapply the layers whose optimistic IDs do not match the removed ID.
+      while (toReapply.length > 0) {
+        const layer = toReapply.pop();
+        this.performTransaction(layer.transaction, layer.optimisticId);
+      }
+
+      this.broadcastWatches();
     }
-
-    this.broadcastWatches();
   }
 
   public performTransaction(
