@@ -11,6 +11,10 @@
   [@joe-re](https://github.com/joe-re) in [#4082](https://github.com/apollographql/apollo-client/pull/4082)
 - Make `isApolloError` available for external use.  <br/>
   [@FredyC](https://github.com/FredyC) in [#4223](https://github.com/apollographql/apollo-client/pull/4223)
+- The `QueryManager` now calls `complete` on the observables used by
+  Apollo Client's Subscription handling. This gives finite subscriptions a
+  chance to handle cleanup.  <br/>
+  [@sujeetsr](https://github.com/sujeetsr) in [#4290](https://github.com/apollographql/apollo-client/pull/4290)
 - Documentation updates.  <br/>
   [@lifedup](https://github.com/lifedup) in [#3931](https://github.com/apollographql/apollo-client/pull/3931)  <br />
   [@Dem0n3D](https://github.com/Dem0n3D) in [#4008](https://github.com/apollographql/apollo-client/pull/4008)  <br />
@@ -27,7 +31,9 @@
   [@danilobuerger](https://github.com/danilobuerger) in [#4214](https://github.com/apollographql/apollo-client/pull/4214)  <br/>
   [@stubailo](https://github.com/stubailo) in [#4220](https://github.com/apollographql/apollo-client/pull/4220)  <br/>
   [@haysclark](https://github.com/haysclark) in [#4255](https://github.com/apollographql/apollo-client/pull/4255)  <br/>
-  [@shelmire](https://github.com/shelmire) in [#4266](https://github.com/apollographql/apollo-client/pull/4266)
+  [@shelmire](https://github.com/shelmire) in [#4266](https://github.com/apollographql/apollo-client/pull/4266)  <br/>
+  [@peggyrayzis](https://github.com/peggyrayzis) in [#4280](https://github.com/apollographql/apollo-client/pull/4280)  <br/>
+  [@caydie-tran](https://github.com/caydie-tran) in [#4300](https://github.com/apollographql/apollo-client/pull/4300)
 
 - The `apollo-client` package no longer exports a `printAST` function from
   `graphql/language/printer`. If you need this functionality, import it
