@@ -52,21 +52,10 @@ const hasOwn = Object.prototype.hasOwnProperty;
 export class OptimisticCacheLayer extends ObjectCache {
   constructor(
     public readonly optimisticId: string,
-    public parent: NormalizedCache | null = null,
+    public readonly parent: NormalizedCache,
+    public readonly transaction: Transaction<NormalizedCacheObject>,
   ) {
     super(Object.create(null));
-  }
-
-  public prune(idToRemove: string) {
-    if (this.parent instanceof OptimisticCacheLayer) {
-      this.parent = this.parent.prune(idToRemove);
-    }
-
-    if (this.optimisticId === idToRemove) {
-      return this.parent;
-    }
-
-    return this;
   }
 
   public toObject(): NormalizedCacheObject {
@@ -233,10 +222,27 @@ export class InMemoryCache extends ApolloCache<NormalizedCacheObject> {
     return Promise.resolve();
   }
 
-  public removeOptimistic(id: string) {
-    if (this.optimisticData instanceof OptimisticCacheLayer) {
-      this.optimisticData = this.optimisticData.prune(id);
+  public removeOptimistic(idToRemove: string) {
+    const toReapply: OptimisticCacheLayer[] = [];
+
+    let layer = this.optimisticData;
+    while (layer instanceof OptimisticCacheLayer) {
+      if (layer.optimisticId !== idToRemove) {
+        toReapply.push(layer);
+      }
+      layer = layer.parent;
     }
+
+    // Reset this.optimisticData to the first non-OptimisticCacheLayer object,
+    // which is almost certainly this.data.
+    this.optimisticData = layer;
+
+    // Reapply the layers whose optimistic IDs do not match the removed ID.
+    while (toReapply.length > 0) {
+      const layer = toReapply.pop();
+      this.performTransaction(layer.transaction, layer.optimisticId);
+    }
+
     this.broadcastWatches();
   }
 
@@ -253,6 +259,7 @@ export class InMemoryCache extends ApolloCache<NormalizedCacheObject> {
       this.data = this.optimisticData = new OptimisticCacheLayer(
         optimisticId,
         this.optimisticData,
+        transaction,
       );
     }
 
